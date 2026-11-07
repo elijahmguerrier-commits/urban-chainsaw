@@ -18,9 +18,5 @@ jobs:
           HQ_FUNCTION_URL: ${{ secrets.HQ_FUNCTION_URL }}
           HQ_CRON_SECRET: ${{ secrets.HQ_CRON_SECRET }}
         run: |
-          test -n "$HQ_FUNCTION_URL" && test -n "$HQ_CRON_SECRET"
-          curl --fail-with-body --retry 2 --max-time 120 \
-            -X POST "$HQ_FUNCTION_URL" \
-            -H "Content-Type: application/json" \
-            -H "x-hq-cron: $HQ_CRON_SECRET" \
-                --data-binary '{"action":"tick"}'
+            test -n "$HQ_FUNCTION_URL" && test -n "$HQ_CRON_SECRET"
+            printf '%s' '{"action":"tick"}' | curl --fail-with-body --max-time 120 -X POST "$HQ_FUNCTION_URL" -H "Content-Type: application/json" -H "x-hq-cron: $HQ_CRON_SECRET" --data-binary @-
