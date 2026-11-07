@@ -3,7 +3,7 @@ name: EliMatic HQ agent tick
 
 on:
   schedule:
-    - cron: '17 * * * *'
+       - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
         run: |
           test -n "$HQ_FUNCTION_URL" && test -n "$HQ_CRON_SECRET"
           curl --fail-with-body --retry 2 --max-time 120 \
-            -X POST "$HQ_FUNCTION_URL" \
-            -H "Content-Type: application/json" \
-            -H "x-hq-cron: $HQ_CRON_SECRET" \
-            -d '{"action":"tick"}'
+          -X POST "$HQ_FUNCTION_URL" \
+          -H "Content-Type: application/json" \
+          -H "x-hq-cron: $HQ_CRON_SECRET" \
+          --data-raw '{"action":"tick"}'
