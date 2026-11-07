@@ -23,4 +23,4 @@ jobs:
             -X POST "$HQ_FUNCTION_URL" \
             -H "Content-Type: application/json" \
             -H "x-hq-cron: $HQ_CRON_SECRET" \
-            --data-binary '{"action":"tick"}'
+                --data-binary '{"action":"tick"}'
