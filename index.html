@@ -25,7 +25,7 @@ const msg=x=>$('message').textContent=x;
 let session=null;
 async function action(payload){
  if(!session)throw Error('Sign in first');
- const r=await fetch(`${config.supabaseUrl}/functions/v1/hq`,{method:'POST',headers:{'Content-Type':'application/json','apikey':config.supabaseAnonKey,'Authorization':`Bearer ${session.access_token}`},body:JSON.stringify(payload)});
+ const r=await fetch(`${config.supabaseUrl}/functions/v1/hq-`,{method:'POST',headers:{'Content-Type':'application/json','apikey':config.supabaseAnonKey,'Authorization':`Bearer ${session.access_token}`},body:JSON.stringify(payload)});
  const d=await r.json();if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);return d;
 }
 function populate(){
