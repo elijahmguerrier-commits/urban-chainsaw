@@ -1,0 +1,243 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EliMatic HQ</title>
+<style>
+:root{color-scheme:dark;--bg:#090e19;--panel:#141d30;--edge:#2b3953;--ink:#edf4ff;--muted:#94a6c1;--accent:#7eabff;--good:#69d6b1;--bad:#ff8d94}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#172a4b 0,transparent 45%),var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}header{padding:25px max(20px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--edge);display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:24px;letter-spacing:.04em;margin:0}h2{font-size:18px;margin:0 0 16px}h3{font-size:14px;margin:8px 0}p{color:var(--muted);line-height:1.5}small,.muted{color:var(--muted)}.tag{font-size:11px;letter-spacing:.12em;color:var(--good);font-weight:700}main{max-width:1180px;margin:auto;padding:20px}nav{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 20px}button,.btn{background:#1b2941;border:1px solid #344a6a;color:var(--ink);padding:10px 13px;border-radius:9px;cursor:pointer;font:inherit}button:hover{border-color:var(--accent)}button.active,.primary{background:#325b9c;border-color:#578ad5}.danger{color:#ffc4c8}.layout{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.panel,.stat{background:linear-gradient(145deg,#19243a,#121b2c);border:1px solid var(--edge);border-radius:14px;padding:18px;min-width:0}.stat strong{display:block;font-size:27px;margin-top:7px}.stat span{color:var(--muted);font-size:12px}.wide{grid-column:span 4}.half{grid-column:span 2}.third{grid-column:span 1}.section{display:none}.section.active{display:block}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}.form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.form label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px}input,select,textarea{width:100%;background:#0d1627;color:var(--ink);border:1px solid #3b4b64;border-radius:8px;padding:10px;font:inherit}textarea{min-height:78px;resize:vertical}.form button{align-self:end}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;min-width:620px;text-align:left}td,th{padding:12px 9px;border-bottom:1px solid #28364b;font-size:13px}th{color:var(--muted);font-weight:600}td{overflow-wrap:anywhere}.pill{padding:3px 8px;border:1px solid #456383;border-radius:99px;font-size:12px}.chart{width:100%;height:200px;display:block}svg text{fill:#8fa2be;font:12px system-ui}progress{width:100%;height:12px;accent-color:#75b7ff}details{margin-top:10px}summary{cursor:pointer}.empty{padding:20px;color:var(--muted);text-align:center}.note{font-size:12px;color:var(--muted)}.toast{position:fixed;bottom:16px;right:16px;background:#29456c;padding:12px 18px;border-radius:10px;display:none;z-index:5}footer{text-align:center;padding:30px;color:var(--muted);font-size:12px}@media(max-width:800px){.layout{grid-template-columns:repeat(2,1fr)}.wide{grid-column:span 2}.half{grid-column:span 2}.third{grid-column:span 1}.form{grid-template-columns:repeat(2,1fr)}}@media(max-width:500px){header{padding:20px}main{padding:12px}.layout{grid-template-columns:1fr}.wide,.half,.third{grid-column:span 1}.form{grid-template-columns:1fr}.stat strong{font-size:23px}}
+#wfEmployees .panel{padding:14px}#wfTasks .panel{margin:12px 0}#wfTasks pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#0a1324;padding:14px;border-radius:8px}#wfBriefing{white-space:pre-wrap;margin-top:14px}textarea{width:100%;background:#0c1526;color:var(--ink);border:1px solid var(--edge);border-radius:7px;padding:10px}button:disabled{opacity:.5;cursor:wait}</style></head><body>
+<header><div><div class="tag">CREATOR OPERATIONS</div><h1>ELIMATIC <span style="color:var(--accent)">HQ</span></h1><small>Build the channel. Understand the business.</small></div><div class="row"><button id="exportBtn">Export backup</button><label class="btn" style="cursor:pointer">Import backup<input id="importBackup" type="file" accept=".json,application/json" hidden></label></div></header>
+<main><nav id="tabs"><button data-tab="command" class="active">Mission Control</button><button data-tab="workforce">AI Workforce</button><button data-tab="overview">Overview</button><button data-tab="videos">Performance Lab</button><button data-tab="money">Finances</button><button data-tab="ideas">Opportunity Vault</button><button data-tab="goals">Milestones</button><button data-tab="settings">Settings</button></nav>
+<section id="command" class="section"><div class="layout">
+<div class="panel wide"><div class="tag">ONE DASHBOARD · TEN SPECIALISTS</div><h2>Mission Control</h2><p>Coordinate ten defined responsibilities from one place. These are on-demand AI jobs, not autonomous background workers. Outputs are saved locally; live research and calendar connections are not included.</p><div id="mcMetrics" class="row"></div></div>
+<div class="panel wide"><h2>Agent network</h2><div id="mcAgents" class="layout"></div></div>
+<div class="panel half"><h2>Mission assignment</h2><form id="mcForm" class="form" style="grid-template-columns:1fr"><label>Agent<select id="mcAgent"></select></label><label>Objective<textarea id="mcObjective" required minlength="5" placeholder="Describe the outcome you want"></textarea></label><button class="primary">Queue mission</button></form><p class="note">Queued missions must be run manually. AI jobs use the optional Gemini connection on the AI Workforce tab.</p></div>
+<div class="panel half"><h2>Integrated workflows</h2><p class="note">One click queues connected tasks across several agents. Run each task from AI Workforce; results do not automatically pass between agents.</p><button id="mcLaunch" style="width:100%;margin-bottom:9px">YouTube launch pipeline</button><button id="mcActing" style="width:100%;margin-bottom:9px">Acting opportunity pipeline</button><button id="mcBusiness" style="width:100%">Product business pipeline</button></div>
+<div class="panel wide" id="serverPanel"><div class="row between"><h2>Connected agent backend</h2><span id="backendStatus" class="pill">Checking connection</span></div><p class="note">This panel connects to the local Python service. Server-side Gemini key, SQLite task history, automatic schedules, and approval gates.</p><div class="row"><button id="backendRefresh">Refresh</button><button id="backendYoutube">Launch YouTube workflow</button><button id="backendActing">Launch acting workflow</button><button id="backendBusiness">Launch business workflow</button></div><div class="layout" style="margin-top:12px"><div class="panel half"><h3>Schedule agent</h3><form id="backendSchedule" class="form" style="grid-template-columns:1fr"><label>Agent<select id="backendAgent"></select></label><label>Assignment<textarea id="backendObjective" required minlength="5"></textarea></label><label>Repeat every (hours)<input id="backendHours" type="number" min="1" max="720" value="24"></label><button class="primary">Enable recurring job</button></form></div><div class="panel half"><h3>Server schedules</h3><div id="backendSchedules"></div></div></div><h3>Agent results and approvals</h3><div id="backendJobs"></div></div><div class="panel wide"><h2>Mission queue</h2><div id="mcQueue"></div></div>
+</div></section><section id="workforce" class="section"><div class="layout">
+<div class="panel wide"><div class="row between"><div><div class="tag">CEO COMMAND CENTER</div><h2>Your 14-role workforce</h2><p class="note">Task execution requires you to click Run. Nothing runs secretly in the background. AI drafting uses your optional Gemini API key; operational analysis uses your saved HQ data.</p></div><button class="btn" id="wfBrief">Generate CEO briefing</button></div><div id="wfStats" class="row"></div><div id="wfBriefing" class="note"></div></div>
+<div class="panel half"><h2>Assign a job</h2><form id="wfForm" class="form" style="grid-template-columns:1fr"><label>Employee<select name="role" id="wfRole"></select></label><label>Assignment<textarea name="instruction" required minlength="5" rows="4" placeholder="Example: Draft a 6-minute Thor commentary script with room for jokes"></textarea></label><button class="btn" type="submit">Assign task</button></form></div>
+<div class="panel half"><h2>AI connection</h2><p class="note">For prototype testing only: your personal Gemini API key is stored in this browser, which exposes it to anyone using this browser/profile. Don't use a shared key on a public site. A server-side proxy is needed for a secure deployment.</p><label>Gemini API key (optional)<input id="wfKey" type="password" autocomplete="off" placeholder="Enter your own key"></label><div class="row"><button class="btn" id="wfSaveKey">Save locally</button><button class="btn" id="wfClearKey">Clear key</button></div><p class="note">No key needed for operational summaries and finance/analytics checks. Research roles cannot verify live competitor data without a research integration.</p></div>
+<div class="panel wide"><h2>Employees</h2><div id="wfEmployees" class="layout"></div></div>
+<div class="panel wide"><div class="row between"><h2>Task board</h2><button class="btn" id="wfExport">Export workforce tasks</button></div><div id="wfTasks"></div></div>
+</div></section><section id="overview" class="section"><div class="layout"><div class="stat"><span>Total video views logged</span><strong id="totalViews">0</strong></div><div class="stat"><span>Average CTR</span><strong id="avgCtr">—</strong></div><div class="stat"><span>Subscribers</span><strong id="subsMetric">0</strong></div><div class="stat"><span>Net tracked profit</span><strong id="profitMetric">$0</strong></div>
+<div class="panel half"><h2>Video views over time</h2><svg class="chart" id="viewsChart" viewBox="0 0 500 200" role="img" aria-label="Views per uploaded video"></svg><div class="note">Based on the videos you've entered. This is not a live YouTube connection.</div></div>
+<div class="panel half"><h2>Performance Lab findings</h2><div id="insights"></div></div>
+<div class="panel half"><h2>Current priorities</h2><div id="goalOverview"></div></div><div class="panel half"><h2>Business snapshot</h2><div id="moneyOverview"></div></div></div></section>
+<section id="videos" class="section"><div class="layout"><div class="panel wide"><div class="row between"><h2>Add video performance</h2><label class="btn">Import CSV<input id="videoCsv" type="file" accept=".csv,text/csv" hidden></label></div><p class="note">Enter your own analytics or import a CSV. Supported headers: title, date, views, impressions, ctr, retention, watchHours. CTR and retention are percentages (e.g. 4.2). Watch hours are optional.</p><form id="videoForm" class="form"><label>Video title<input name="title" required maxlength="180" placeholder="Why Tony Stark..."></label><label>Upload date<input name="date" type="date" required></label><label>Views<input name="views" type="number" min="0" step="1" required></label><label>Impressions<input name="impressions" type="number" min="0" step="1"></label><label>CTR (%)<input name="ctr" type="number" min="0" max="100" step=".01"></label><label>Average percentage viewed (%)<input name="retention" type="number" min="0" max="100" step=".01"></label><label>Watch hours<input name="watchHours" type="number" min="0" step=".01"></label><button class="primary">Add video</button></form></div>
+<div class="panel wide"><h2>Your videos</h2><div class="scroll"><table><thead><tr><th>Title</th><th>Date</th><th>Views</th><th>CTR</th><th>Avg viewed</th><th>Vs. average</th><th></th></tr></thead><tbody id="videoRows"></tbody></table></div></div></div></section>
+<section id="money" class="section"><div class="layout"><div class="stat"><span>Revenue logged</span><strong id="revenueStat">$0</strong></div><div class="stat"><span>Expenses logged</span><strong id="expensesStat">$0</strong></div><div class="stat"><span>Net</span><strong id="netStat">$0</strong></div><div class="stat"><span>Transactions</span><strong id="txnStat">0</strong></div>
+<div class="panel wide"><h2>Add transaction</h2><form id="moneyForm" class="form"><label>Date<input name="date" type="date" required></label><label>Type<select name="type"><option value="expense">Expense</option><option value="revenue">Revenue</option></select></label><label>Amount ($)<input name="amount" type="number" min=".01" step=".01" required></label><label>Description<input name="description" required placeholder="Microphone, sponsorship..."></label><label>Category<input name="category" placeholder="Equipment, software, ads..."></label><button class="primary">Save transaction</button></form></div><div class="panel half"><h2>Revenue scenario calculator</h2><p class="note">Hypothetical RPM-based calculation, not a prediction or guaranteed earnings.</p><div class="form" style="grid-template-columns:1fr 1fr"><label>Monthly monetized views<input id="calcViews" type="number" min="0" value="100000"></label><label>Estimated RPM ($ per 1,000 views)<input id="calcRpm" type="number" min="0" step=".1" value="3"></label></div><h2 id="calcResult" style="margin-top:20px">$300.00 / month</h2></div><div class="panel half"><h2>Transaction history</h2><div class="scroll"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th></th></tr></thead><tbody id="moneyRows"></tbody></table></div></div></div></section>
+<section id="ideas" class="section"><div class="layout"><div class="panel wide"><h2>Save a researched opportunity</h2><form id="ideaForm" class="form"><label>Topic / working title<input name="title" required maxlength="180"></label><label>Reference creator<input name="creator" placeholder="Creator name"></label><label>Reference video views<input name="views" type="number" min="0"></label><label>Reference upload date<input name="date" type="date"></label><label>Stage<select name="stage"><option>Researching</option><option>Packaging</option><option>Approved</option><option>Produced</option></select></label><label>Reference URL<input name="url" type="url" placeholder="https://..."></label><label style="grid-column:1/-1">Packaging / why it works<textarea name="notes" placeholder="Audience hook, 3 title options, thumbnail concept, supporting evidence..."></textarea></label><button class="primary">Save opportunity</button></form></div><div class="panel wide"><h2>Opportunity Vault</h2><div id="ideaRows"></div></div></div></section>
+<section id="goals" class="section"><div class="layout"><div class="panel wide"><h2>Create a milestone</h2><form id="goalForm" class="form"><label>Milestone<input name="title" required placeholder="Reach 1,000 subscribers"></label><label>Target value<input name="target" type="number" min=".01" step="any" required></label><label>Current value<input name="current" type="number" min="0" step="any" required value="0"></label><label>Unit<input name="unit" placeholder="subscribers, $, uploads"></label><label>Target date (optional)<input name="date" type="date"></label><button class="primary">Add milestone</button></form></div><div class="panel wide"><h2>Milestone tracker</h2><div id="goalRows"></div></div></div></section>
+<section id="settings" class="section"><div class="layout"><div class="panel half"><h2>Channel settings</h2><form id="settingsForm" class="form" style="grid-template-columns:1fr"><label>Channel name<input name="channel" required></label><label>Current subscribers<input name="subscribers" type="number" min="0" required></label><button class="primary">Save settings</button></form></div><div class="panel half"><h2>Data & privacy</h2><p>All entries are saved locally in this browser using localStorage. No account, cloud sync, or YouTube API connection is included. Use Export backup regularly: browser resets can erase local data.</p><button class="danger" id="resetBtn">Erase all local HQ data</button></div></div></section>
+</main><div id="toast" class="toast" role="status"></div><footer>EliMatic HQ · Mission Control V3 · Local-first creator business dashboard</footer>
+<script>
+(()=>{'use strict';
+const KEY='elimatic_hq_v1';const $=id=>document.getElementById(id);
+const fresh=()=>({videos:[],transactions:[],ideas:[],goals:[],settings:{channel:'EliMatic',subscribers:0}});
+let data;try{data=JSON.parse(localStorage.getItem(KEY))||fresh();if(!Array.isArray(data.videos)||!Array.isArray(data.transactions)||!Array.isArray(data.ideas)||!Array.isArray(data.goals))throw Error()}catch{data=fresh()}
+data.settings={...fresh().settings,...data.settings};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch{toast('Storage full: export a backup.')}render()};
+const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n||0);
+const num=n=>new Intl.NumberFormat('en-US').format(n||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const validNum=v=>v===''||v===null||v===undefined?null:Number(v);
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const id=()=>crypto.randomUUID?.()||String(Date.now())+Math.random();
+function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').style.display='none',2600)}
+function fields(form){return Object.fromEntries(new FormData(form).entries())}
+function del(kind,item){if(confirm('Delete this entry?')){data[kind]=data[kind].filter(x=>x.id!==item);save()}}
+window.removeHQ=del;
+function setTab(tab){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===tab));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}
+$('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)};
+function addForm(form,kind,transform){$(form).onsubmit=e=>{e.preventDefault();const v=transform(fields(e.target));if(!v)return;data[kind].push({id:id(),...v});e.target.reset();setDefaults();save();toast('Saved')}}
+function setDefaults(){document.querySelectorAll('input[type=date]').forEach(x=>{if(!x.value&&!x.closest('#ideaForm')&&!x.closest('#goalForm'))x.value=new Date().toLocaleDateString('en-CA')})}
+addForm('videoForm','videos',v=>{for(const k of ['views','impressions','ctr','retention','watchHours'])v[k]=validNum(v[k]);return v});
+addForm('moneyForm','transactions',v=>({...v,amount:Number(v.amount)}));
+addForm('ideaForm','ideas',v=>({...v,views:validNum(v.views)}));
+addForm('goalForm','goals',v=>({...v,target:Number(v.target),current:Number(v.current)}));
+$('settingsForm').onsubmit=e=>{e.preventDefault();data.settings={channel:e.target.channel.value,subscribers:Number(e.target.subscribers.value)};save();toast('Settings saved')};
+$('resetBtn').onclick=()=>{if(confirm('Permanently erase ALL HQ entries stored in this browser? Export a backup first.')){data=fresh();save();toast('Local data erased')}};
+$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});download(blob,'elimatic-hq-backup-'+new Date().toISOString().slice(0,10)+'.json')};
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+$('importBackup').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!['videos','transactions','ideas','goals'].every(k=>Array.isArray(d[k])))throw Error('Invalid backup');if(!confirm('Replace all current HQ data with this backup?'))return;data={...fresh(),...d,settings:{...fresh().settings,...d.settings}};save();toast('Backup restored')}catch(err){toast('Import failed: '+err.message)}e.target.value=''};
+function csvParse(text){const rows=[];let row=[],field='',quoted=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++}else quoted=!quoted}else if(c===','&&!quoted){row.push(field);field=''}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field);if(row.some(x=>x.trim()))rows.push(row);row=[];field=''}else field+=c}row.push(field);if(row.some(x=>x.trim()))rows.push(row);return rows}
+$('videoCsv').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const rows=csvParse(await f.text());const header=rows.shift().map(x=>x.trim().toLowerCase().replace(/[^a-z]/g,''));const get=(r,...names)=>{const i=header.findIndex(h=>names.includes(h));return i<0?'':r[i]??''};if(!header.includes('title')||!header.includes('views'))throw Error('CSV needs title and views columns');let count=0;for(const r of rows){const title=get(r,'title');const views=Number(get(r,'views').replace(/,/g,''));if(!title||!Number.isFinite(views)||views<0)continue;const entry={id:id(),title,date:get(r,'date','publishdate','uploaddate'),views,impressions:validNum(get(r,'impressions')),ctr:validNum(get(r,'ctr','impressionsclickthroughrate')),retention:validNum(get(r,'retention','averagepercentageviewed')),watchHours:validNum(get(r,'watchhours','watchtimehours'))};for(const k of ['impressions','ctr','retention','watchHours'])if(entry[k]!==null&&!Number.isFinite(entry[k]))entry[k]=null;data.videos.push(entry);count++}save();toast('Imported '+count+' video rows')}catch(err){toast('CSV error: '+err.message)}e.target.value=''};
+$('calcViews').oninput=$('calcRpm').oninput=()=>{$('calcResult').textContent=money(Math.max(0,Number($('calcViews').value)||0)*Math.max(0,Number($('calcRpm').value)||0)/1000)+' / month'};
+function render(){
+const videos=[...data.videos].sort((a,b)=>String(b.date).localeCompare(String(a.date)));const total=data.videos.reduce((a,v)=>a+(Number(v.views)||0),0);const ctrs=data.videos.map(v=>v.ctr).filter(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))).map(Number);const ctr=avg(ctrs);const baseline=avg(data.videos.map(v=>Number(v.views)||0));
+const revenue=data.transactions.filter(t=>t.type==='revenue').reduce((a,t)=>a+Number(t.amount||0),0);const expenses=data.transactions.filter(t=>t.type==='expense').reduce((a,t)=>a+Number(t.amount||0),0);
+$('totalViews').textContent=num(total);$('avgCtr').textContent=ctr===null?'—':ctr.toFixed(2)+'%';$('subsMetric').textContent=num(data.settings.subscribers);$('profitMetric').textContent=money(revenue-expenses);
+$('revenueStat').textContent=money(revenue);$('expensesStat').textContent=money(expenses);$('netStat').textContent=money(revenue-expenses);$('txnStat').textContent=num(data.transactions.length);
+$('videoRows').innerHTML=videos.length?videos.map(v=>`<tr><td>${esc(v.title)}</td><td>${esc(v.date)}</td><td>${num(v.views)}</td><td>${v.ctr==null?'—':Number(v.ctr).toFixed(2)+'%'}</td><td>${v.retention==null?'—':Number(v.retention).toFixed(1)+'%'}</td><td>${baseline?((v.views/baseline-1)*100).toFixed(0)+'%':'—'}</td><td><button aria-label="Delete video" onclick="removeHQ('videos','${v.id}')">×</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No videos yet. Add your first upload or import a CSV.</td></tr>';
+const over=baseline?data.videos.filter(v=>v.views>=baseline*1.5):[];
+let insights=[];if(!videos.length)insights.push('Add at least a few uploads to start seeing performance patterns.');else{insights.push(`${videos.length} uploads logged. Average views: ${num(Math.round(baseline))}.`);if(over.length)insights.push(`${over.length} video${over.length===1?' is':'s are'} at least 50% above your logged average: ${over.slice(0,3).map(v=>esc(v.title)).join('; ')}.`);if(ctrs.length<3)insights.push('Add CTR for at least 3 videos to compare packaging performance.');else insights.push(`Average logged CTR: ${ctr.toFixed(2)}%. Compare each upload with its own impressions and audience context.`);const ret=data.videos.filter(v=>v.retention!=null);if(ret.length)insights.push(`Average percentage viewed across ${ret.length} logged videos: ${avg(ret.map(v=>Number(v.retention))).toFixed(1)}%.`)}$('insights').innerHTML=insights.map(x=>'<p>'+x+'</p>').join('');
+$('moneyOverview').innerHTML=`<p>Revenue: <b>${money(revenue)}</b></p><p>Expenses: <b>${money(expenses)}</b></p><p>Net: <b>${money(revenue-expenses)}</b></p><p class="note">Only transactions you enter are included.</p>`;
+$('moneyRows').innerHTML=data.transactions.length?[...data.transactions].reverse().map(t=>`<tr><td>${esc(t.date)}</td><td>${esc(t.description)}<br><small>${esc(t.category)}</small></td><td style="color:${t.type==='revenue'?'var(--good)':'var(--bad)'}">${t.type==='revenue'?'+':'−'}${money(t.amount)}</td><td><button onclick="removeHQ('transactions','${t.id}')">×</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No transactions yet.</td></tr>';
+$('ideaRows').innerHTML=data.ideas.length?[...data.ideas].reverse().map(i=>`<div style="padding:15px 0;border-bottom:1px solid var(--edge)"><div class="row between"><b>${esc(i.title)}</b><span class="pill">${esc(i.stage)}</span></div><p>${esc(i.creator||'No reference creator')} · ${i.views==null?'Views not entered':num(i.views)+' reference views'} · ${esc(i.date||'Date not entered')}</p><p style="white-space:pre-wrap;color:var(--ink)">${esc(i.notes)}</p><div class="row">${/^https?:\/\//.test(i.url||'')?`<a href="${esc(i.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Open reference</a>`:''}<button onclick="removeHQ('ideas','${i.id}')">Delete</button></div></div>`).join(''):'<div class="empty">No opportunities saved yet.</div>';
+$('goalRows').innerHTML=data.goals.length?data.goals.map(g=>`<div style="padding:15px 0;border-bottom:1px solid var(--edge)"><div class="row between"><b>${esc(g.title)}</b><span>${num(g.current)} / ${num(g.target)} ${esc(g.unit)}</span></div><progress max="100" value="${Math.min(100,Math.max(0,g.current/g.target*100))}"></progress><div class="row between"><small>${g.date?'Target: '+esc(g.date):'No deadline'}</small><div class="row"><button onclick="updateHQGoal('${g.id}')">Update progress</button><button onclick="removeHQ('goals','${g.id}')">Delete</button></div></div></div>`).join(''):'<div class="empty">Set your first milestone.</div>';
+$('goalOverview').innerHTML=data.goals.length?data.goals.slice(0,3).map(g=>`<p><b>${esc(g.title)}</b> — ${Math.min(100,Math.round(g.current/g.target*100))}%</p><progress max="100" value="${Math.min(100,g.current/g.target*100)}"></progress>`).join(''):'<p>No milestones yet. Add a goal in Milestones.</p>';
+$('settingsForm').elements.channel.value=data.settings.channel;$('settingsForm').elements.subscribers.value=data.settings.subscribers;
+drawChart(videos.slice().reverse());
+}
+window.updateHQGoal=gid=>{const g=data.goals.find(x=>x.id===gid);if(!g)return;const val=prompt('New current value for '+g.title,g.current);if(val===null)return;const n=Number(val);if(!Number.isFinite(n)||n<0){toast('Enter a valid nonnegative number');return}g.current=n;save()};
+function drawChart(videos){const svg=$('viewsChart');if(!videos.length){svg.innerHTML='<text x="250" y="105" text-anchor="middle">Add videos to see your chart</text>';return}const max=Math.max(1,...videos.map(v=>Number(v.views)||0));const plot=videos.slice(-16),step=450/plot.length;svg.innerHTML='<line x1="30" y1="175" x2="490" y2="175" stroke="#425675"/>'+plot.map((v,i)=>{const height=Math.max(1,(Number(v.views)||0)/max*145),x=35+i*step;return `<rect x="${x}" y="${175-height}" width="${Math.max(5,step-8)}" height="${height}" rx="3" fill="#7eabff"><title>${esc(v.title)}: ${num(v.views)} views</title></rect>`}).join('')+`<text x="30" y="18">Max: ${num(max)} views</text><text x="490" y="193" text-anchor="end">Latest →</text>`}
+setDefaults();render();$('calcViews').oninput();
+})();
+</script>
+<script>
+(()=>{'use strict';
+const roles=[
+['General Manager','Coordinates assignments and produces CEO status reports','local'],
+['YouTube Strategist','Evaluates channel patterns and proposes experiments','ai'],
+['Content Researcher','Builds research outlines; external facts need verification','ai'],
+['Scriptwriter','Drafts commentary scripts with performance cues','ai'],
+['Video Editor','Creates an editing decision list; cannot render video yet','ai'],
+['Thumbnail Designer','Creates thumbnail briefs; does not generate image files','ai'],
+['Packaging Strategist','Develops titles and thumbnail positioning','ai'],
+['YouTube Analyst','Analyzes manually logged channel metrics','local'],
+['SEO Specialist','Drafts descriptions, tags and metadata','ai'],
+['Production Manager','Builds production checklists and schedules','local'],
+['Social Media Manager','Drafts Shorts hooks and repurposing plans','ai'],
+['Community Manager','Drafts community responses from supplied comments','ai'],
+['Business Development Manager','Drafts sponsorship outreach and deal checklists','ai'],
+['Finance Manager','Analyzes logged expenses and revenue','local']];
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const WKEY='elimatic_hq_workforce_v1',KKEY='elimatic_hq_gemini_prototype_key',HQKEY='elimatic_hq_v1';
+let tasks=[];try{tasks=JSON.parse(localStorage.getItem(WKEY))||[];if(!Array.isArray(tasks))tasks=[]}catch{}
+let key='';try{key=localStorage.getItem(KKEY)||''}catch{}
+$('wfKey').value=key;
+$('wfRole').innerHTML=roles.map((r,i)=>`<option value="${i}">${esc(r[0])}</option>`).join('');
+function hq(){try{return JSON.parse(localStorage.getItem(HQKEY))||{}}catch{return {}}}
+function save(){localStorage.setItem(WKEY,JSON.stringify(tasks));draw()}
+function localReport(role,task){
+ const d=hq(),videos=d.videos||[],tx=d.transactions||[],goals=d.goals||[],ideas=d.ideas||[];
+ const rev=tx.filter(t=>t.type==='revenue').reduce((a,t)=>a+(+t.amount||0),0);
+ const exp=tx.filter(t=>t.type==='expense').reduce((a,t)=>a+(+t.amount||0),0);
+ const views=videos.reduce((a,v)=>a+(+v.views||0),0);
+ const summary=`Recorded uploads: ${videos.length}; logged views: ${views.toLocaleString()}; ideas: ${ideas.length}; milestones: ${goals.length}; revenue: $${rev.toFixed(2)}; expenses: $${exp.toFixed(2)}; net: $${(rev-exp).toFixed(2)}.`;
+ if(role==='Finance Manager')return `FINANCIAL REVIEW\n${summary}\n${tx.length?'Check individual transactions in Finances for errors and missing entries.':'No transactions logged. Enter real expenses/revenue before drawing conclusions.'}\nNext action: reconcile the last 30 days of income and expenses.`;
+ if(role==='YouTube Analyst')return `PERFORMANCE REVIEW\n${summary}\n${videos.length?videos.slice().sort((a,b)=>(+b.views||0)-(+a.views||0)).slice(0,3).map(v=>`${v.title}: ${v.views||0} views, CTR ${v.ctr??'not entered'}%`).join('\n'):'No videos logged. Import your YouTube Studio CSV or enter videos in Performance Lab.'}\nNext action: compare CTR and average percentage viewed for recent uploads.`;
+ if(role==='Production Manager')return `PRODUCTION PLAN\nRequested: ${task}\n1. Confirm the next video's idea, title, and thumbnail concept.\n2. Finalize script and recording plan.\n3. Record talking-head footage.\n4. Create rough cut, add authorized media and SFX.\n5. Review retention pacing and audio.\n6. Approve thumbnail and export.\n7. Publish and review analytics after upload.\nThis is a checklist, not an automatic scheduled job.`;
+ return `CEO BRIEFING\n${summary}\nWorkforce tasks: ${tasks.length}; completed: ${tasks.filter(t=>t.status==='completed').length}; waiting: ${tasks.filter(t=>t.status==='assigned').length}; errors: ${tasks.filter(t=>t.status==='error').length}.\nCEO action: review outstanding deliverables and assign the next priority.\nNo work executes without a Run action in this prototype.`;
+}
+async function gemini(prompt){
+ if(!key)throw Error('Connect your personal Gemini API key in the AI connection panel.');
+ const base='https://generativelanguage.googleapis.com/v1beta/';
+ const headers={'Content-Type':'application/json','x-goog-api-key':key};
+ const mr=await fetch(base+'models?pageSize=100',{headers:{'x-goog-api-key':key}});
+ const md=await mr.json();if(!mr.ok)throw Error(md.error?.message||'Model discovery failed');
+ const models=(md.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')&&/gemini/i.test(m.name)&&!/image|tts|audio|embedding|live/i.test(m.name)).sort((a,b)=>Number(!/flash/i.test(a.name))-Number(!/flash/i.test(b.name))).slice(0,4);
+ if(!models.length)throw Error('No Gemini text models available for this key.');
+ let error='No response';
+ for(const m of models){
+  try{
+   const r=await fetch(base+m.name+':generateContent',{method:'POST',headers,body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.65,maxOutputTokens:4000}})});
+   const d=await r.json();
+   if(r.ok){const out=d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('');if(out)return out;error='Empty model response';continue}
+   error=d.error?.message||`HTTP ${r.status}`;
+   if(r.status===401||r.status===403||/quota exceeded|billing/i.test(error))break;
+  }catch(e){error=e.message}
+ }
+ throw Error(error);
+}
+const instructions={
+'YouTube Strategist':'Analyze the idea as a strategic opportunity, with audience, hypothesis, CTR packaging, risks, and a test plan. Do not invent competitor view counts or claim live research.',
+'Content Researcher':'Build a fact-checkable research brief. Separate verified user-supplied facts from unverified claims. Do not invent citations.',
+'Scriptwriter':'Draft a 5–10 minute entertainment-first Marvel/DC movie character commentary script. Aggressive first five seconds, clear stakes, open loops, natural humor, purposeful [Deep voice] and [High voice] cues, and [Personality Cue: improv] placeholders. Avoid dry essays.',
+'Video Editor':'Produce a timestamp-agnostic editing decision list: cuts, zooms, B-roll search keywords, comedic beats, sound effects, music mood, captions and quality checks. Do not pretend video files were rendered or footage acquired.',
+'Thumbnail Designer':'Provide three clear, human-executable thumbnail concepts. No AI-generated art. Max 3 focal elements, max 4 words, emotional hook and composition.',
+'Packaging Strategist':'Provide exactly 3 titles under 50 characters, one simple thumbnail concept, and the click psychology.',
+'SEO Specialist':'Draft YouTube description, tags and a pinned comment. Keep language natural, not keyword-stuffed.',
+'Social Media Manager':'Identify 3 Shorts angles, each with opening hook, punchline, cut suggestion, and caption.',
+'Community Manager':'Draft a short reply and group audience feedback themes from comments provided. Do not claim to have accessed live comments.',
+'Business Development Manager':'Build a sponsor-fit checklist, outreach draft, and negotiation questions. No invented contacts or deals.'
+};
+async function runTask(tid){
+ const t=tasks.find(x=>x.id===tid);if(!t||t.status==='running')return;
+ const role=roles[t.role][0];t.status='running';t.error='';save();
+ try{
+  t.output=roles[t.role][2]==='local'?localReport(role,t.instruction):await gemini(`You are the ${role} for EliMatic, a personality-led Marvel/DC MOVIE commentary channel for ages 18–24. Eli is CEO and retains final creative authority. Do the specific assignment, not a generic overview. Be clear about missing information and never fabricate external data. Role guidelines: ${instructions[role]||''}\nASSIGNMENT:\n${t.instruction}\nProduce an actionable deliverable.`);
+  t.status='completed';t.finished=new Date().toISOString();
+ }catch(e){t.status='error';t.error=String(e.message||e)}
+ save();
+}
+function draw(){
+ $('wfStats').innerHTML=`<span class="pill">${roles.length} roles</span><span class="pill">${tasks.filter(t=>t.status==='assigned').length} assigned</span><span class="pill">${tasks.filter(t=>t.status==='completed').length} completed</span><span class="pill">${tasks.filter(t=>t.status==='error').length} blocked</span>`;
+ $('wfEmployees').innerHTML=roles.map((r,i)=>`<div class="panel half"><b>${esc(r[0])}</b> <span class="pill">${r[2]==='local'?'HQ data':'Gemini required'}</span><p class="note">${esc(r[1])}</p><button class="btn" data-assign="${i}">Assign work</button></div>`).join('');
+ $('wfTasks').innerHTML=tasks.length?tasks.slice().reverse().map(t=>`<div class="panel"><div class="row between"><b>${esc(roles[t.role]?.[0]||'Employee')}</b><span class="pill">${esc(t.status)}</span></div><p>${esc(t.instruction)}</p><small>${esc(new Date(t.created).toLocaleString())}</small>${t.output?`<pre>${esc(t.output)}</pre>`:''}${t.error?`<p style="color:var(--bad)">${esc(t.error)}</p>`:''}<div class="row"><button class="btn" data-run="${esc(t.id)}" ${t.status==='running'?'disabled':''}>${t.status==='completed'?'Run again':t.status==='running'?'Working…':'Run task'}</button><button class="btn" data-copy="${esc(t.id)}" ${!t.output?'disabled':''}>Copy result</button><button class="btn" data-remove="${esc(t.id)}">Delete</button></div></div>`).join(''):'<p class="note">No assignments yet. Choose an employee and assign a job.</p>';
+}
+$('wfForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2),role:Number(f.get('role')),instruction:String(f.get('instruction')).trim(),status:'assigned',created:new Date().toISOString(),output:''});e.target.reset();save()};
+$('wfEmployees').onclick=e=>{const b=e.target.closest('[data-assign]');if(!b)return;$('wfRole').value=b.dataset.assign;$('wfForm').querySelector('textarea').focus();window.scrollTo({top:$('wfForm').getBoundingClientRect().top+window.scrollY-100,behavior:'smooth'})};
+$('wfTasks').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=tasks.find(t=>t.id===(b.dataset.run||b.dataset.copy||b.dataset.remove));if(!t)return;if(b.dataset.run)runTask(t.id);else if(b.dataset.copy&&t.output)navigator.clipboard.writeText(t.output).catch(()=>alert('Copy failed. Select the result text manually.'));else if(b.dataset.remove&&confirm('Delete this task?')){tasks=tasks.filter(x=>x.id!==t.id);save()}};
+$('wfBrief').onclick=()=>{$('wfBriefing').textContent=localReport('General Manager','CEO briefing')};
+$('wfSaveKey').onclick=()=>{key=$('wfKey').value.trim();try{localStorage.setItem(KKEY,key);alert('Key saved in this browser. Keep this prototype private.')}catch(e){alert('Could not save key: '+e.message)}};
+$('wfClearKey').onclick=()=>{key='';$('wfKey').value='';localStorage.removeItem(KKEY);alert('Saved key cleared')};
+$('wfExport').onclick=()=>{const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.href=u;a.download='elimatic-workforce-tasks.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+draw();
+})();
+</script>
+<script>
+(()=>{'use strict';
+const A=[{"name": "World Scanner", "type": "radar", "prompt": "Research relevant Marvel/DC film news, AI tools, verified casting leads and emerging business opportunities. Identify sources, dates and what deserves attention."}, {"name": "Chief of Staff", "type": "brief", "prompt": "Create an executive briefing from actual HQ metrics and workforce results. Separate verified information from missing information; prioritize decisions."}, {"name": "Audience Research", "type": "research", "prompt": "Evaluate Marvel/DC movie commentary demand, competition, video formats, core/casual/new viewer pull and evidence needed before production."}, {"name": "Production", "type": "production", "prompt": "Prepare script or editing decision lists for EliMatic; preserve the creator's own humor and creative decisions."}, {"name": "Creative Director", "type": "packaging", "prompt": "Develop exactly three short titles with counts and one no-AI-image thumbnail brief. Test clarity, stakes and viewer curiosity."}, {"name": "Business Manager", "type": "finance", "prompt": "Analyze recorded income and expenses, potential monetization and financial risks. Never invent revenue."}, {"name": "Acting Agent", "type": "acting", "prompt": "Create an acting opportunity research brief, audition tracker and preparation plan. Never invent live casting calls."}, {"name": "Learning Coach", "type": "learning", "prompt": "Create a measurable weekly SKILLPATH learning sprint for acting, creator skills or building products."}, {"name": "Personal CRM", "type": "crm", "prompt": "Organize user-provided professional contacts and follow-up plans. Never invent contacts or send messages."}, {"name": "Life Manager", "type": "life", "prompt": "Build a realistic schedule and priorities plan using known commitments; clearly flag missing calendar access."}];
+const $=id=>document.getElementById(id);
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&#39;'}[c]));
+const KEY='elimatic_mission_control_v3';
+let missions=[];try{missions=JSON.parse(localStorage.getItem(KEY))||[]}catch{}
+const mapping={radar:2,brief:0,research:1,production:3,packaging:6,finance:13,acting:2,learning:2,crm:11,life:0};
+const save=()=>{localStorage.setItem(KEY,JSON.stringify(missions));render()};
+function add(i,objective){missions.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2),agent:i,objective,status:'queued',created:new Date().toISOString()})}
+function render(){
+$('mcMetrics').innerHTML=`<span class="pill">10 agents defined</span><span class="pill">${missions.filter(x=>x.status==='queued').length} queued</span><span class="pill">${missions.filter(x=>x.status==='handed-off').length} handed to workforce</span><span class="pill">Manual execution</span>`;
+$('mcAgents').innerHTML=A.map((a,i)=>`<div class="panel half"><span class="tag">AGENT ${String(i+1).padStart(2,'0')}</span><h3>${escapeHTML(a.name)}</h3><p class="note">${escapeHTML(a.prompt)}</p><button data-agent="${i}">Assign mission</button></div>`).join('');
+$('mcQueue').innerHTML=missions.length?missions.slice().reverse().map(m=>`<div class="panel" style="margin:8px 0"><div class="row between"><b>${escapeHTML(A[m.agent]?.name)}</b><span class="pill">${escapeHTML(m.status)}</span></div><p>${escapeHTML(m.objective)}</p><div class="row"><button data-handoff="${escapeHTML(m.id)}" ${m.status==='handed-off'?'disabled':''}>Send to workforce</button><button data-delete="${escapeHTML(m.id)}">Remove</button></div></div>`).join(''):'<p class="note">No missions yet. Assign an agent or queue an integrated workflow.</p>';
+}
+$('mcAgent').innerHTML=A.map((a,i)=>`<option value="${i}">${String(i+1).padStart(2,'0')} — ${escapeHTML(a.name)}</option>`).join('');
+$('mcAgents').onclick=e=>{const b=e.target.closest('[data-agent]');if(!b)return;$('mcAgent').value=b.dataset.agent;$('mcObjective').value=A[Number(b.dataset.agent)].prompt;$('mcObjective').focus()};
+$('mcForm').onsubmit=e=>{e.preventDefault();add(Number($('mcAgent').value),$('mcObjective').value.trim());$('mcObjective').value='';save()};
+const workflows={
+mcLaunch:[[2,'Find evidence-backed Marvel/DC movie character commentary opportunities and evaluate viewer pull.'],[4,'Package the strongest user-approved opportunity: three titles with counts and one thumbnail brief.'],[3,'Prepare the production plan after the creator approves the idea and packaging.']],
+mcActing:[[0,'Identify casting research priorities and verified opportunities; never invent listings.'],[6,'Create an acting audition research and preparation plan based on legitimate sources.'],[9,'Build an audition preparation schedule; ask for missing dates.']],
+mcBusiness:[[0,'Research customer problems and competitors for one of the user’s digital product ideas.'],[5,'Evaluate possible pricing, costs and commercial viability using real inputs.'],[1,'Summarize business validation priorities and decisions for the CEO.']]
+};
+for(const [id,steps] of Object.entries(workflows))$(id).onclick=()=>{steps.forEach(([i,t])=>add(i,t));save()};
+$('mcQueue').onclick=e=>{
+const b=e.target.closest('button');if(!b)return;
+const m=missions.find(x=>x.id===(b.dataset.handoff||b.dataset.delete));if(!m)return;
+if(b.dataset.delete){missions=missions.filter(x=>x.id!==m.id);save();return}
+if(b.dataset.handoff){
+const role=$('wfRole');role.value=String(mapping[A[m.agent].type]??0);
+const form=$('wfForm');form.querySelector('textarea').value=`MISSION CONTROL — ${A[m.agent].name}\n${A[m.agent].prompt}\n\nOBJECTIVE:\n${m.objective}\n\nDo not invent external data or claim access to unavailable systems.`;
+form.requestSubmit();m.status='handed-off';save();
+document.querySelector('[data-tab="workforce"]').click();
+}
+};
+render();
+})();
+</script>
+<script>
+(()=>{'use strict';
+const $=x=>document.getElementById(x);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&#39;'}[c]));
+let agents=[];
+async function api(path,body){
+ const opts=body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)};
+ const r=await fetch('/api/'+path,opts);
+ const d=await r.json();if(!r.ok)throw Error(d.error||r.statusText);return d;
+}
+async function refresh(){
+ try{
+ const [status,jobs,schedules]=await Promise.all([api('status'),api('jobs'),api('schedules')]);
+ agents=status.agents;$('backendStatus').textContent=status.ai_configured?'Connected · Gemini ready':'Connected · add GEMINI_API_KEY';
+ $('backendAgent').innerHTML=agents.map((a,i)=>`<option value="${i}">${esc(a.name)}</option>`).join('');
+ $('backendSchedules').innerHTML=schedules.length?schedules.map(x=>`<div class="panel" style="margin-bottom:8px"><b>${esc(agents[x.agent]?.name)}</b><p class="note">${esc(x.objective)}</p><small>Every ${x.every_hours}h · ${x.enabled?'Enabled':'Paused'}</small><button data-toggle="${x.id}" data-enabled="${x.enabled?0:1}">${x.enabled?'Pause':'Resume'}</button></div>`).join(''):'<p class="note">No server schedules configured.</p>';
+ $('backendJobs').innerHTML=jobs.length?jobs.map(j=>`<div class="panel" style="margin:8px 0"><div class="row between"><b>#${j.id} · ${esc(agents[j.agent]?.name)}</b><span class="pill">${esc(j.status)}</span></div><p>${esc(j.objective)}</p>${j.result?`<details><summary>View completed report</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(j.result)}</pre></details>`:''}${j.error?`<p class="note">${esc(j.error)}</p>`:''}${j.status==='pending_approval'?`<button data-approve="${j.id}">Approve execution</button>`:''}${['queued','pending_approval'].includes(j.status)?`<button data-cancel="${j.id}">Cancel</button>`:''}</div>`).join(''):'<p class="note">No server jobs yet.</p>';
+ }catch(e){$('backendStatus').textContent='Offline — open through Python server';$('backendJobs').textContent='The standalone HTML still works locally. Run server.py to activate persistent agents.'}
+}
+$('backendRefresh').onclick=refresh;
+for(const [id,type] of [['backendYoutube','youtube'],['backendActing','acting'],['backendBusiness','business']])$(id).onclick=async()=>{try{await api('workflow',{type});refresh()}catch(e){alert(e.message)}};
+$('backendSchedule').onsubmit=async e=>{e.preventDefault();try{await api('schedules',{agent:Number($('backendAgent').value),objective:$('backendObjective').value,every_hours:Number($('backendHours').value)});refresh()}catch(e){alert(e.message)}};
+$('backendSchedules').onclick=async e=>{const b=e.target.closest('[data-toggle]');if(!b)return;try{await api('schedule-toggle',{id:Number(b.dataset.toggle),enabled:Number(b.dataset.enabled)});refresh()}catch(e){alert(e.message)}};
+$('backendJobs').onclick=async e=>{const b=e.target.closest('[data-approve],[data-cancel]');if(!b)return;try{if(b.dataset.approve)await api('approve',{id:Number(b.dataset.approve)});else await api('job-cancel',{id:Number(b.dataset.cancel)});refresh()}catch(e){alert(e.message)}};
+refresh();
+})();
+</script></body></html>

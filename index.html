@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EliMatic HQ · Cloud V6</title><style>
+:root{color-scheme:dark;font:15px system-ui,sans-serif;background:#0b1220;color:#eaf1fc}body{max-width:1100px;margin:auto;padding:28px 18px}h1{font-size:32px;margin-bottom:4px}h2{font-size:19px}small,.muted{color:#9caec6}header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}section,.card{border:1px solid #26344d;background:#131e30;border-radius:15px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px}.grid>.card{margin:0}input,textarea,select,button{font:inherit;border-radius:9px;padding:10px;background:#1b2b44;color:white;border:1px solid #34465f}textarea{width:100%;box-sizing:border-box;min-height:85px}input,select{max-width:100%;box-sizing:border-box}button{cursor:pointer;background:#294e85}button:hover{background:#3667a8}button:disabled{opacity:.5}label{display:block;margin:10px 0 5px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0c1524;padding:12px;border-radius:9px}#message{color:#f6d48c} .pill{border:1px solid #3e5878;border-radius:20px;padding:4px 10px;font-size:12px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hidden{display:none!important}</style></head>
+<body><header><div><small>ELIMATIC HQ / CLOUD WORKFORCE V6</small><h1>Mission Control</h1><div class="muted">10 specialists · one database · scheduled execution</div></div><div class="row"><span id="identity" class="pill">Not signed in</span><button id="logout" class="hidden">Sign out</button></div></header>
+<p id="message"></p>
+<section id="login"><h2>Private workspace</h2><p class="muted">Sign in using your Supabase email and password. Enable email confirmation in Supabase if desired.</p><label>Email</label><input id="email" type="email" autocomplete="email"><label>Password</label><input id="password" type="password" autocomplete="current-password"><div class="row" style="margin-top:14px"><button id="signin">Sign in</button><button id="signup">Create account</button></div></section>
+<main id="app" class="hidden">
+<section><h2>Ten agents</h2><div id="agents" class="grid"></div></section>
+<div class="grid"><section><h2>Assign mission</h2><label>Agent</label><select id="agent"></select><label>Objective</label><textarea id="objective" placeholder="Describe the outcome, constraints and any evidence available"></textarea><button id="create">Queue agent</button></section>
+<section><h2>Recurring missions</h2><label>Agent</label><select id="scheduleAgent"></select><label>Objective</label><textarea id="scheduleObjective" placeholder="What should this agent report?"></textarea><label>Interval (hours)</label><input id="hours" type="number" value="24" min="1" max="720"><button id="schedule">Add schedule</button><div id="schedules"></div></section></div>
+<section><h2>Coordinated workflows</h2><p class="muted">Downstream stages require your approval and wait for earlier stages to complete.</p><div class="row"><button data-flow="youtube">YouTube launch</button><button data-flow="acting">Acting pipeline</button><button data-flow="business">Business validation</button></div></section>
+<section><div class="row" style="justify-content:space-between"><h2>Shared mission history</h2><button id="refresh">Refresh results</button></div><p class="muted">The scheduled GitHub Action processes queued jobs hourly. Results are saved to Supabase.</p><div id="jobs"></div></section>
+<p class="muted">For the earlier browser-only dashboard, <a style="color:#9ec8ff" href="legacy-v5.html">open V5</a>. V5's localStorage data is not synchronized with this cloud workspace.</p>
+</main>
+<script src="config.js"></script><script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+const config=window.HQ_CONFIG||{};
+const $=id=>document.getElementById(id);
+const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&#39;'}[c]));
+const names=['World Scanner','Chief of Staff','Audience Research','Production','Creative Director','Business Manager','Acting Agent','Learning Coach','Personal CRM','Life Manager'];
+const descriptions=['Research priorities','Executive briefings','Viewer demand','Production planning','Packaging decisions','Revenue and costs','Audition preparation','Skill development','Professional relationships','Schedules and priorities'];
+const valid=config.supabaseUrl?.startsWith('https://')&&config.supabaseAnonKey?.length>20;
+if(!valid){$('message').textContent='Setup required: enter your Supabase project URL and publishable key in config.js.'}
+const supabase=valid?createClient(config.supabaseUrl,config.supabaseAnonKey):null;
+const msg=x=>$('message').textContent=x;
+let session=null;
+async function action(payload){
+ if(!session)throw Error('Sign in first');
+ const r=await fetch(`${config.supabaseUrl}/functions/v1/hq`,{method:'POST',headers:{'Content-Type':'application/json','apikey':config.supabaseAnonKey,'Authorization':`Bearer ${session.access_token}`},body:JSON.stringify(payload)});
+ const d=await r.json();if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);return d;
+}
+function populate(){
+ $('agents').innerHTML=names.map((n,i)=>`<div class="card"><small>AGENT ${String(i+1).padStart(2,'0')}</small><h2>${escape(n)}</h2><p class="muted">${escape(descriptions[i])}</p><button data-assign="${i}">Assign</button></div>`).join('');
+ for(const id of ['agent','scheduleAgent'])$(id).innerHTML=names.map((n,i)=>`<option value="${i}">${escape(n)}</option>`).join('');
+}
+async function refresh(){
+ if(!session)return;
+ const [j,s]=await Promise.all([supabase.from('hq_jobs').select('*').order('created_at',{ascending:false}).limit(100),supabase.from('hq_schedules').select('*').order('next_run',{ascending:true})]);
+ if(j.error||s.error)throw Error(j.error?.message||s.error?.message);
+ $('jobs').innerHTML=j.data.length?j.data.map(x=>`<div class="card"><div class="row"><b>${escape(names[x.agent])}</b><span class="pill">${escape(x.status)}</span></div><p>${escape(x.objective)}</p>${x.result?`<details><summary>Read report</summary><pre>${escape(x.result)}</pre></details>`:''}${x.error?`<p class="muted">${escape(x.error)}</p>`:''}${x.status==='pending_approval'?`<button data-approve="${x.id}">Approve</button>`:''}${['queued','pending_approval'].includes(x.status)?`<button data-cancel="${x.id}">Cancel</button>`:''}</div>`).join(''):'<p class="muted">No missions yet.</p>';
+ $('schedules').innerHTML=s.data.length?s.data.map(x=>`<div class="card"><b>${escape(names[x.agent])}</b><p class="muted">${escape(x.objective)}</p><small>Every ${x.every_hours}h · ${x.enabled?'Active':'Paused'}</small><p><button data-toggle="${x.id}" data-enabled="${!x.enabled}">${x.enabled?'Pause':'Resume'}</button></p></div>`).join(''):'<p class="muted">No schedules.</p>';
+}
+async function authUI(){
+ if(!supabase)return;
+ const {data}=await supabase.auth.getSession();session=data.session;
+ $('login').classList.toggle('hidden',!!session);$('app').classList.toggle('hidden',!session);$('logout').classList.toggle('hidden',!session);
+ $('identity').textContent=session?.user?.email||'Not signed in';
+ if(session)await refresh();
+}
+async function guard(fn){try{msg('');await fn()}catch(e){msg(e.message)}}
+$('signin').onclick=()=>guard(async()=>{const {error}=await supabase.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)throw error;await authUI()});
+$('signup').onclick=()=>guard(async()=>{const {error}=await supabase.auth.signUp({email:$('email').value,password:$('password').value});if(error)throw error;msg('Account created. Check your email if confirmation is enabled.');await authUI()});
+$('logout').onclick=()=>guard(async()=>{await supabase.auth.signOut();await authUI()});
+$('agents').onclick=e=>{const b=e.target.closest('[data-assign]');if(b){$('agent').value=b.dataset.assign;$('objective').focus()}};
+$('create').onclick=()=>guard(async()=>{await action({action:'create_job',agent:Number($('agent').value),objective:$('objective').value});$('objective').value='';await refresh();msg('Mission queued')});
+$('schedule').onclick=()=>guard(async()=>{await action({action:'schedule',agent:Number($('scheduleAgent').value),objective:$('scheduleObjective').value,every_hours:Number($('hours').value)});await refresh();msg('Schedule created')});
+document.querySelectorAll('[data-flow]').forEach(b=>b.onclick=()=>guard(async()=>{await action({action:'workflow',type:b.dataset.flow});await refresh();msg('Workflow queued')}));
+$('jobs').onclick=e=>guard(async()=>{const b=e.target.closest('[data-approve],[data-cancel]');if(!b)return;await action({action:b.dataset.approve?'approve':'cancel',id:b.dataset.approve||b.dataset.cancel});await refresh()});
+$('schedules').onclick=e=>guard(async()=>{const b=e.target.closest('[data-toggle]');if(!b)return;await action({action:'toggle_schedule',id:b.dataset.toggle,enabled:b.dataset.enabled==='true'});await refresh()});
+$('refresh').onclick=()=>guard(refresh);
+populate();if(supabase){supabase.auth.onAuthStateChange(()=>setTimeout(()=>guard(authUI),0));guard(authUI)}
+</script></body></html>
